@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokémon 30th Celebration - TCG Collector</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        gold: '#fbbf24',
+                        darkBg: '#0b0f19',
+                        cardBg: '#1e293b'
+                    },
+                    animation: {
+                        'pulse-glow': 'pulseGlow 2s infinite',
+                        'float': 'float 3s ease-in-out infinite',
+                        'card-flip': 'cardFlip 0.6s ease-out forwards'
+                    },
+                    keyframes: {
+                        pulseGlow: {
+                            '0%, 100%': { boxShadow: '0 0 15px rgba(251, 191, 36, 0.4)' },
+                            '50%': { boxShadow: '0 0 30px rgba(251, 191, 36, 0.9)' }
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-10px)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at top, #1e1b4b 0%, #0b0f19 100%);
+            min-height: 100vh;
+            color: #f8fafc;
+        }
+
+        /* Effets de Hologramme pour Cartes Rares */
+        .holo-card {
+            position: relative;
+            overflow: hidden;
+        }
+        .holo-card::after {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                115deg, 
+                transparent 20%, 
+                rgba(255, 255, 255, 0.25) 40%, 
+                rgba(255, 215, 0, 0.3) 50%, 
+                rgba(255, 0, 128, 0.25) 60%, 
+                transparent 80%
+            );
+            transform: rotate(25deg);
+            transition: all 0.5s ease;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        .holo-card:hover::after {
+            transform: rotate(25deg) translate(15%, 15%);
+            opacity: 1;
+        }
+
+        /* Rareté Dorée pour 30th */
+        .border-30th {
+            border: 3px solid #fbbf24;
+            box-shadow: 0 0 15px rgba(251, 191, 36, 0.5);
+        }
+        .border-legendary {
+            border: 3px solid #ec4899;
+            box-shadow: 0 0 20px rgba(236, 72, 153, 0.6);
+        }
+
+        /* Animation Booster Opening */
+        .booster-pack {
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .booster-pack:hover {
+            transform: scale(1.05) translateY(-5px);
+            box-shadow: 0 15px 30px rgba(251, 191, 36, 0.3);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #fbbf24;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- BARRE DE NAVIGATION -->
+    <header class="bg-slate-900/80 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50 px-4 py-3">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <!-- Logo -->
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-300 flex items-center justify-center font-black text-slate-900 text-xl shadow-lg shadow-amber-500/30">
+                    30
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-lg tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-500">
+                        POKÉMON TCG
+                    </h1>
+                    <p class="text-xs text-slate-400">30th Celebration Edition</p>
+                </div>
+            </div>
+
+            <!-- Stats & Solde -->
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2 bg-slate-800/90 border border-amber-500/30 px-4 py-1.5 rounded-full shadow-inner">
+                    <i class="fa-solid fa-coins text-amber-400 text-lg animate-bounce"></i>
+                    <span id="coins-display" class="font-bold text-amber-300 text-base">0</span>
+                    <span class="text-xs text-slate-400 font-semibold">🪙</span>
+                </div>
+                <button onclick="resetData()" class="text-xs text-slate-500 hover:text-red-400 transition" title="Réinitialiser la sauvegarde">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- NAVIGATION PAR ONGLETS -->
+    <nav class="bg-slate-900/50 border-b border-slate-800/60 py-2">
+        <div class="max-w-md mx-auto flex justify-around px-2">
+            <button onclick="switchTab('boosters')" id="tab-boosters" class="tab-btn active px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition bg-amber-500/20 text-amber-400 border border-amber-500/40">
+                <i class="fa-solid fa-box-open"></i> Boosters
+            </button>
+            <button onclick="switchTab('shop')" id="tab-shop" class="tab-btn px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition text-slate-400 hover:bg-slate-800">
+                <i class="fa-solid fa-store"></i> Boutique
+            </button>
+            <button onclick="switchTab('binder')" id="tab-binder" class="tab-btn px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition text-slate-400 hover:bg-slate-800">
+                <i class="fa-solid fa-book-bookmark"></i> Album (<span id="binder-count">0</span>)
+            </button>
+        </div>
+    </nav>
+
+    <!-- CONTENU PRINCIPAL -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6">
+
+        <!-- SECTION 1: OUVERTURE DE BOOSTERS -->
+        <section id="section-boosters" class="tab-section block">
+            <div class="text-center my-6">
+                <h2 class="text-3xl font-black text-white tracking-wide">OUVRIR UN BOOSTER</h2>
+                <p class="text-slate-400 text-sm mt-1">Cliquez sur un booster en votre possession pour découvrir vos cartes !</p>
+            </div>
+
+            <!-- Inventaire de boosters -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto my-8">
+                <!-- Booster Standard -->
+                <div class="bg-slate-800/60 border border-slate-700/80 rounded-2xl p-5 flex flex-col items-center text-center relative overflow-hidden group">
+                    <div class="w-40 h-60 rounded-xl bg-gradient-to-br from-blue-600 via-indigo-700 to-purple-800 p-3 shadow-xl booster-pack flex flex-col justify-between items-center relative border-2 border-indigo-400/30" onclick="openBooster('standard')">
+                        <div class="text-xs font-black bg-indigo-900/80 px-2 py-0.5 rounded text-indigo-200">STANDARD</div>
+                        <div class="text-center my-auto">
+                            <i class="fa-solid fa-bolt text-5xl text-yellow-300 drop-shadow-md mb-2"></i>
+                            <div class="font-black text-lg text-white leading-tight">30th Edition</div>
+                            <div class="text-[10px] text-indigo-200 uppercase tracking-widest mt-1">5 Cartes</div>
+                        </div>
+                        <div class="text-[11px] font-bold text-amber-300 bg-slate-900/60 px-3 py-1 rounded-full">OUVRIR</div>
+                    </div>
+                    <div class="mt-4 flex justify-between items-center w-full px-2">
+                        <span class="text-sm font-semibold text-slate-300">En réserve :</span>
+                        <span id="count-booster-standard" class="text-lg font-black text-amber-400">0</span>
+                    </div>
+                    <button onclick="openBooster('standard')" class="w-full mt-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded-xl text-sm transition shadow-lg shadow-indigo-600/30 disabled:opacity-50 disabled:cursor-not-allowed" id="btn-open-standard">
+                        Ouvrir Booster
+                    </button>
+                </div>
+
+                <!-- Booster Deluxe 30th -->
+                <div class="bg-slate-800/60 border border-amber-500/40 rounded-2xl p-5 flex flex-col items-center text-center relative overflow-hidden group">
+                    <div class="w-40 h-60 rounded-xl bg-gradient-to-br from-amber-500 via-yellow-600 to-red-600 p-3 shadow-xl booster-pack flex flex-col justify-between items-center relative border-2 border-amber-300/60 animate-pulse-glow" onclick="openBooster('deluxe')">
+                        <div class="text-xs font-black bg-slate-900/90 px-2 py-0.5 rounded text-amber-300 border border-amber-400/50">DELUXE 30TH</div>
+                        <div class="text-center my-auto">
+                            <i class="fa-solid fa-crown text-5xl text-amber-200 drop-shadow-md mb-2"></i>
+                            <div class="font-black text-lg text-white leading-tight">Celebration</div>
+                            <div class="text-[10px] text-amber-100 uppercase tracking-widest mt-1">5 Cartes Rares+</div>
+                        </div>
+                        <div class="text-[11px] font-bold text-slate-900 bg-amber-300 px-3 py-1 rounded-full">OUVRIR</div>
+                    </div>
+                    <div class="mt-4 flex justify-between items-center w-full px-2">
+                        <span class="text-sm font-semibold text-slate-300">En réserve :</span>
+                        <span id="count-booster-deluxe" class="text-lg font-black text-amber-400">0</span>
+                    </div>
+                    <button onclick="openBooster('deluxe')" class="w-full mt-3 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black py-2 rounded-xl text-sm transition shadow-lg shadow-amber-500/30 disabled:opacity-50 disabled:cursor-not-allowed" id="btn-open-deluxe">
+                        Ouvrir Deluxe
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: BOUTIQUE / SHOP -->
+        <section id="section-shop" class="tab-section hidden">
+            <div class="text-center my-6">
+                <h2 class="text-3xl font-black text-white tracking-wide">BOUTIQUE 🪙</h2>
+                <p class="text-slate-400 text-sm mt-1">Achetez des boosters ou des cartes à l'unité avec vos pièces !</p>
+            </div>
+
+            <!-- Boosters en vente -->
+            <h3 class="text-xl font-bold text-amber-400 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-box"></i> Pack de Boosters
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                <div class="bg-slate-800/80 border border-slate-700 p-4 rounded-xl flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-16 bg-gradient-to-br from-blue-600 to-purple-700 rounded-lg flex items-center justify-center text-white font-bold text-xs">
+                            STD
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-white">Booster Standard 30th</h4>
+                            <p class="text-xs text-slate-400">Contient 5 cartes (Commune à Légendaire)</p>
+                        </div>
+                    </div>
+                    <button onclick="buyBooster('standard', 50)" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold px-4 py-2 rounded-xl text-sm flex items-center gap-1.5 transition">
+                        50 🪙
+                    </button>
+                </div>
+
+                <div class="bg-slate-800/80 border border-amber-500/40 p-4 rounded-xl flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-16 bg-gradient-to-br from-amber-500 to-red-600 rounded-lg flex items-center justify-center text-slate-950 font-bold text-xs">
+                            DLX
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-amber-300">Booster Deluxe 30th</h4>
+                            <p class="text-xs text-slate-400">Cartes Rares, EX & Légendaires garanties !</p>
+                        </div>
+                    </div>
+                    <button onclick="buyBooster('deluxe', 200)" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold px-4 py-2 rounded-xl text-sm flex items-center gap-1.5 transition">
+                        200 🪙
+                    </button>
+                </div>
+            </div>
+
+            <!-- Cartes à l'unité en vente -->
+            <h3 class="text-xl font-bold text-amber-400 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-star"></i> Cartes à l'unité en Vedette
+            </h3>
+            <div id="shop-cards-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                <!-- Rempli en JS -->
+            </div>
+        </section>
+
+        <!-- SECTION 3: BINDER / COLLECTION -->
+        <section id="section-binder" class="tab-section hidden">
+            <div class="text-center my-6">
+                <h2 class="text-3xl font-black text-white tracking-wide">MA COLLECTION</h2>
+                <p class="text-slate-400 text-sm mt-1">Consultez l'ensemble des cartes Pokémon du set 30th Celebration.</p>
+            </div>
+
+            <!-- Filtres de rareté -->
+            <div class="flex flex-wrap justify-center gap-2 mb-6">
+                <button onclick="filterBinder('all')" class="filter-btn active px-3 py-1 rounded-lg text-xs font-bold bg-amber-500 text-slate-950">Toutes</button>
+                <button onclick="filterBinder('Légendaire')" class="filter-btn px-3 py-1 rounded-lg text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700">Légendaires</button>
+                <button onclick="filterBinder('Ultra Rare')" class="filter-btn px-3 py-1 rounded-lg text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700">Ultra Rares (EX)</button>
+                <button onclick="filterBinder('Rare')" class="filter-btn px-3 py-1 rounded-lg text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700">Rares</button>
+                <button onclick="filterBinder('Commune')" class="filter-btn px-3 py-1 rounded-lg text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700">Communes</button>
+            </div>
+
+            <!-- Grille de collection -->
+            <div id="binder-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                <!-- Rempli dynamiquement -->
+            </div>
+        </section>
+    </main>
+
+    <!-- MODAL D'OUVERTURE DE CARTE -->
+    <div id="reveal-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-lg z-50 hidden flex flex-col items-center justify-center p-4">
+        <div class="text-center mb-6">
+            <h3 id="reveal-title" class="text-2xl font-black text-amber-400 tracking-wider">BOOSTER OUVERT !</h3>
+            <p id="reveal-subtitle" class="text-slate-300 text-sm">Cliquez sur chaque carte pour la retourner et collecter vos pièces</p>
+        </div>
+
+        <!-- Conteneur des 5 cartes obtenues -->
+        <div id="reveal-cards-container" class="flex flex-wrap justify-center items-center gap-4 max-w-5xl my-4">
+            <!-- Les 5 cartes s'affichent ici -->
+        </div>
+
+        <!-- Bouton Fermer -->
+        <button id="close-reveal-btn" onclick="closeRevealModal()" class="mt-8 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-8 py-3 rounded-2xl text-base shadow-lg shadow-amber-500/20 transition opacity-50 cursor-not-allowed" disabled>
+            Récupérer toutes les cartes
+        </button>
+    </div>
+
+    <!-- NOTIFICATION TOAST -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-800 border border-amber-500/50 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-amber-400 text-xl"></i>
+        <span id="toast-msg" class="text-sm font-semibold">Notification</span>
+    </div>
+
+    <!-- SCRIPT DU JEU -->
+    <script>
+        /* --- 1. BASE DE DONNÉES DES CARTES (30TH CELEBRATION) --- */
+        const CARDS_DATABASE = [
+            // LÉGENDAIRES & ULTRA RARES (250 🪙 & 100 🪙)
+            { id: 1, name: "Pikachu ex", hp: 190, type: "Électrique", rarity: "Légendaire", value: 250, shopPrice: 1000, img: "images/pikachu-ex.png", color: "#eab308" },
+            { id: 2, name: "Mewtwo ex", hp: 230, type: "Psy", rarity: "Légendaire", value: 250, shopPrice: 1200, img: "images/mewtwo-ex.png", color: "#a855f7" },
+            { id: 3, name: "Greninja ex", hp: 300, type: "Eau", rarity: "Légendaire", value: 250, shopPrice: 1500, img: "images/greninja-ex.png", color: "#3b82f6" },
+            { id: 4, name: "Mew ex", hp: 160, type: "Psy", rarity: "Ultra Rare", value: 100, shopPrice: 600, img: "images/mew-ex.png", color: "#ec4899" },
+            { id: 5, name: "Charizard (Dracaufeu)", hp: 120, type: "Feu", rarity: "Légendaire", value: 250, shopPrice: 1500, img: "images/charizard.png", color: "#ef4444" },
+            { id: 6, name: "Salamence ex", hp: 330, type: "Dragon", rarity: "Ultra Rare", value: 100, shopPrice: 750, img: "images/salamence-ex.png", color: "#10b981" },
+            { id: 7, name: "Jirachi ex", hp: 160, type: "Acier", rarity: "Ultra Rare", value: 100, shopPrice: 700, img: "images/jirachi-ex.png", color: "#64748b" },
+            { id: 8, name: "Sylveon ex", hp: 270, type: "Fée", rarity: "Ultra Rare", value: 100, shopPrice: 800, img: "images/sylveon-ex.png", color: "#f472b6" },
+            { id: 9, name: "Oiseaux Légendaires", hp: 300, type: "Vol", rarity: "Légendaire", value: 250, shopPrice: 1400, img: "images/legendary-birds.png", color: "#0ea5e9" },
+            
+            // RARES (30 🪙)
+            { id: 10, name: "Reshiram", hp: 130, type: "Feu", rarity: "Rare", value: 30, shopPrice: 200, img: "images/reshiram.png", color: "#f97316" },
+            { id: 11, name: "Ho-Oh", hp: 130, type: "Feu", rarity: "Rare", value: 30, shopPrice: 220, img: "images/ho-oh.png", color: "#dc2626" },
+            { id: 12, name: "Moltres (Sulfura)", hp: 120, type: "Feu", rarity: "Rare", value: 30, shopPrice: 180, img: "images/moltres.png", color: "#ea580c" },
+            { id: 13, name: "Articuno (Artikodin)", hp: 120, type: "Eau", rarity: "Rare", value: 30, shopPrice: 180, img: "images/articuno.png", color: "#0284c7" },
+            { id: 14, name: "Zapdos (Électhor)", hp: 120, type: "Électrique", rarity: "Rare", value: 30, shopPrice: 180, img: "images/zapdos.png", color: "#ca8a04" },
+            { id: 15, name: "Kyogre", hp: 140, type: "Eau", rarity: "Rare", value: 30, shopPrice: 200, img: "images/kyogre.png", color: "#2563eb" },
+            { id: 16, name: "Palkia", hp: 130, type: "Eau", rarity: "Rare", value: 30, shopPrice: 200, img: "images/palkia.png", color: "#7c3aed" },
+            { id: 17, name: "Toxtricity", hp: 140, type: "Électrique", rarity: "Rare", value: 30, shopPrice: 150, img: "images/toxtricity.png", color: "#9333ea" },
+            { id: 18, name: "Lycanroc", hp: 130, type: "Combat", rarity: "Rare", value: 30, shopPrice: 150, img: "images/lycanroc.png", color: "#b45309" },
+            { id: 19, name: "Chandelure", hp: 140, type: "Psy", rarity: "Rare", value: 30, shopPrice: 150, img: "images/chandelure.png", color: "#6b21a8" },
+
+            // COMMUNES (10 🪙)
+            { id: 20, name: "Vulpix (Goupix)", hp: 70, type: "Feu", rarity: "Commune", value: 10, shopPrice: 50, img: "images/vulpix.png", color: "#f97316" },
+            { id: 21, name: "Slowpoke (Ramoloss)", hp: 80, type: "Eau", rarity: "Commune", value: 10, shopPrice: 50, img: "images/slowpoke.png", color: "#f472b6" },
+            { id: 22, name: "Lapras (Lokhlass)", hp: 130, type: "Eau", rarity: "Commune", value: 10, shopPrice: 60, img: "images/lapras.png", color: "#38bdf8" },
+            { id: 23, name: "Morpeko", hp: 70, type: "Électrique", rarity: "Commune", value: 10, shopPrice: 40, img: "images/morpeko.png", color: "#eab308" },
+            { id: 24, name: "Drifloon (Baudrive)", hp: 70, type: "Psy", rarity: "Commune", value: 10, shopPrice: 40, img: "images/drifloon.png", color: "#c084fc" },
+            { id: 25, name: "Scraggy (Zorua)", hp: 80, type: "Obscurité", rarity: "Commune", value: 10, shopPrice: 40, img: "images/scraggy.png", color: "#475569" },
+            { id: 26, name: "Exeggcute (Noeunoeuf)", hp: 60, type: "Plante", rarity: "Commune", value: 10, shopPrice: 30, img: "images/exeggcute.png", color: "#4ade80" },
+            { id: 27, name: "Tropius", hp: 120, type: "Plante", rarity: "Commune", value: 10, shopPrice: 40, img: "images/tropius.png", color: "#22c55e" },
+            { id: 28, name: "Cherubi (Ceribou)", hp: 40, type: "Plante", rarity: "Commune", value: 10, shopPrice: 30, img: "images/cherubi.png", color: "#f43f5e" },
+            { id: 29, name: "Pikachu (Base)", hp: 70, type: "Électrique", rarity: "Commune", value: 10, shopPrice: 80, img: "images/pikachu-base.png", color: "#facc15" }
+        ];
+
+        /* --- 2. ÉTAT DU JOUEUR ET SAUVEGARDE --- */
+        let player = {
+            coins: 150, // Pièces de départ
+            boosters: {
+                standard: 2, // 2 boosters gracieusement offerts au démarrage
+                deluxe: 0
+            },
+            collection: {} // ex: { 1: 2, 5: 1 } (id_carte: quantite)
+        };
+
+        // Charger les données sauvegardées
+        function loadPlayerData() {
+            const saved = localStorage.getItem('pokemon_tcg_30th_save');
+            if (saved) {
+                try {
+                    player = JSON.parse(saved);
+                } catch(e) {
+                    console.error("Erreur lors du chargement de la sauvegarde", e);
+                }
+            }
+            updateUI();
+        }
+
+        // Sauvegarder dans localStorage
+        function savePlayerData() {
+            localStorage.setItem('pokemon_tcg_30th_save', JSON.stringify(player));
+            updateUI();
+        }
+
+        function resetData() {
+            if (confirm("Voulez-vous réinitialiser toutes vos données de jeu ?")) {
+                localStorage.removeItem('pokemon_tcg_30th_save');
+                player = { coins: 150, boosters: { standard: 2, deluxe: 0 }, collection: {} };
+                savePlayerData();
+                showToast("Sauvegarde réinitialisée !", "success");
+            }
+        }
+
+        /* --- 3. MISE À JOUR DE L'INTERFACE (UI) --- */
+        function updateUI() {
+            document.getElementById('coins-display').innerText = player.coins;
+            document.getElementById('count-booster-standard').innerText = player.boosters.standard || 0;
+            document.getElementById('count-booster-deluxe').innerText = player.boosters.deluxe || 0;
+
+            // Boutons booster état
+            document.getElementById('btn-open-standard').disabled = (player.boosters.standard || 0) <= 0;
+            document.getElementById('btn-open-deluxe').disabled = (player.boosters.deluxe || 0) <= 0;
+
+            // Nombre total de cartes uniques dans l'album
+            const totalOwned = Object.keys(player.collection).length;
+            document.getElementById('binder-count').innerText = `${totalOwned}/${CARDS_DATABASE.length}`;
+
+            renderShop();
+            renderBinder('all');
+        }
+
+        /* --- 4. GESTION DES ONGLETS --- */
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-section').forEach(sec => sec.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active', 'bg-amber-500/20', 'text-amber-400', 'border', 'border-amber-500/40');
+                btn.classList.add('text-slate-400');
+            });
+
+            document.getElementById(`section-${tabName}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`tab-${tabName}`);
+            activeBtn.classList.add('active', 'bg-amber-500/20', 'text-amber-400', 'border', 'border-amber-500/40');
+            activeBtn.classList.remove('text-slate-400');
+        }
+
+        /* --- 5. GÉNÉRATEUR DE CARTE DYNAMIQUE (Si image absente) --- */
+        function createCardElement(card, isFlipped = false, showCount = false) {
+            const ownedQty = player.collection[card.id] || 0;
+            const isOwned = ownedQty > 0;
+
+            let borderClass = "border-slate-700";
+            let rarityBadge = "";
+            let rarityBg = "bg-slate-700 text-white";
+
+            if (card.rarity === "Légendaire") {
+                borderClass = "border-legendary holo-card";
+                rarityBadge = "⭐ LÉGENDAIRE";
+                rarityBg = "bg-pink-600 text-white font-bold";
+            } else if (card.rarity === "Ultra Rare") {
+                borderClass = "border-30th holo-card";
+                rarityBadge = "✨ ULTRA RARE";
+                rarityBg = "bg-amber-500 text-slate-950 font-black";
+            } else if (card.rarity === "Rare") {
+                borderClass = "border-indigo-500/70";
+                rarityBadge = "🔹 RARE";
+                rarityBg = "bg-indigo-600 text-white";
+            } else {
+                rarityBadge = "• COMMUNE";
+            }
+
+            const cardHtml = `
+                <div class="card-inner w-full h-full relative duration-500 transition-transform ${isFlipped ? '' : 'pointer-events-auto'}" style="transform-style: preserve-3d;">
+                    <!-- FACADE AVANT DE LA CARTE -->
+                    <div class="w-full h-full rounded-2xl bg-gradient-to-b from-slate-800 to-slate-900 border-2 ${borderClass} p-2.5 flex flex-col justify-between relative shadow-xl overflow-hidden ${!isOwned && showCount ? 'opacity-40 grayscale' : ''}">
+                        
+                        <!-- Header Carte (Nom + PV) -->
+                        <div class="flex justify-between items-center z-10">
+                            <span class="font-black text-xs md:text-sm text-white truncate max-w-[70%]">${card.name}</span>
+                            <span class="font-extrabold text-xs text-red-400">${card.hp} HP</span>
+                        </div>
+
+                        <!-- Visuel central du Pokémon -->
+                        <div class="my-2 relative w-full h-28 md:h-32 rounded-xl flex items-center justify-center overflow-hidden border border-slate-700/50" style="background: radial-gradient(circle, ${card.color}44 0%, #0f172a 100%);">
+                            <!-- Image locale avec fallback Canvas/SVG -->
+                            <img src="${card.img}" alt="${card.name}" class="object-contain max-h-full max-w-full drop-shadow-md z-10" onerror="this.onerror=null; this.src=''; this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            
+                            <!-- Visuel de secours si l'image n'est pas trouvée -->
+                            <div class="hidden flex-col items-center justify-center text-center p-2 z-0">
+                                <i class="fa-solid fa-dragon text-4xl mb-1" style="color: ${card.color}"></i>
+                                <span class="text-[10px] font-bold text-slate-300 uppercase tracking-widest">30th Edition</span>
+                            </div>
+
+                            <!-- Filigrane Logo 30th -->
+                            <div class="absolute bottom-1 right-1 opacity-20 text-[10px] font-black text-amber-300 pointer-events-none">
+                                30th
+                            </div>
+                        </div>
+
+                        <!-- Footer Carte (Rareté + Valeur) -->
+                        <div class="z-10 flex justify-between items-center text-[10px]">
+                            <span class="px-2 py-0.5 rounded ${rarityBg}">${rarityBadge}</span>
+                            <span class="font-bold text-amber-300 bg-slate-950/80 px-1.5 py-0.5 rounded border border-amber-500/30">+${card.value} 🪙</span>
+                        </div>
+
+                        ${showCount && ownedQty > 0 ? `
+                            <div class="absolute top-2 right-2 bg-amber-400 text-slate-950 text-[11px] font-black px-2 py-0.5 rounded-full shadow-lg z-20">
+                                x${ownedQty}
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+            return cardHtml;
+        }
+
+        /* --- 6. SYSTÈME D'OUVERTURE DE BOOSTERS --- */
+        let currentDrawnCards = [];
+        let revealedCardsCount = 0;
+
+        function openBooster(type) {
+            if ((player.boosters[type] || 0) <= 0) {
+                showToast("Vous n'avez pas ce booster !", "error");
+                return;
+            }
+
+            // Consommer le booster
+            player.boosters[type]--;
+            savePlayerData();
+
+            // Tirer 5 cartes selon le type
+            currentDrawnCards = [];
+            revealedCardsCount = 0;
+
+            for (let i = 0; i < 5; i++) {
+                let selectedCard;
+                if (type === 'deluxe') {
+                    // Booster Deluxe : Rares, Ultra Rares et Légendaires uniquement
+                    const rarePool = CARDS_DATABASE.filter(c => c.rarity !== 'Commune');
+                    selectedCard = rarePool[Math.floor(Math.random() * rarePool.length)];
+                } else {
+                    // Booster Standard : Probabilités classiques
+                    const rand = Math.random();
+                    let pool;
+                    if (rand < 0.05) { // 5% Légendaire
+                        pool = CARDS_DATABASE.filter(c => c.rarity === 'Légendaire');
+                    } else if (rand < 0.20) { // 15% Ultra Rare
+                        pool = CARDS_DATABASE.filter(c => c.rarity === 'Ultra Rare');
+                    } else if (rand < 0.50) { // 30% Rare
+                        pool = CARDS_DATABASE.filter(c => c.rarity === 'Rare');
+                    } else { // 50% Commune
+                        pool = CARDS_DATABASE.filter(c => c.rarity === 'Commune');
+                    }
+                    selectedCard = pool[Math.floor(Math.random() * pool.length)];
+                }
+                currentDrawnCards.push(selectedCard);
+            }
+
+            // Préparer la vue modale
+            const container = document.getElementById('reveal-cards-container');
+            container.innerHTML = '';
+
+            const closeBtn = document.getElementById('close-reveal-btn');
+            closeBtn.disabled = true;
+            closeBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            currentDrawnCards.forEach((card, index) => {
+                const cardWrapper = document.createElement('div');
+                cardWrapper.className = 'w-36 h-52 md:w-44 md:h-64 cursor-pointer perspective';
+                
+                // Verso de carte (Dos Pokémon)
+                cardWrapper.innerHTML = `
+                    <div id="drawn-card-${index}" class="w-full h-full relative rounded-2xl bg-gradient-to-br from-indigo-900 to-slate-900 border-2 border-amber-400/50 p-2 flex flex-col items-center justify-center text-center shadow-2xl transition-transform duration-500 hover:scale-105">
+                        <div class="w-16 h-16 rounded-full border-4 border-amber-400 flex items-center justify-center bg-slate-950 shadow-inner">
+                            <span class="font-black text-amber-400 text-lg">30</span>
+                        </div>
+                        <span class="text-xs font-bold text-amber-300 mt-3 uppercase tracking-wider">Cliquez pour révéler</span>
+                    </div>
+                `;
+
+                cardWrapper.onclick = () => revealSingleCard(index, card, cardWrapper);
+                container.appendChild(cardWrapper);
+            });
+
+            document.getElementById('reveal-modal').classList.remove('hidden');
+        }
+
+        function revealSingleCard(index, card, wrapperElement) {
+            const cardElement = document.getElementById(`drawn-card-${index}`);
+            if (cardElement.dataset.revealed === "true") return;
+
+            cardElement.dataset.revealed = "true";
+            
+            // Animation et affichage du recto
+            wrapperElement.innerHTML = createCardElement(card, true, false);
+
+            // Ajouter les pièces au joueur
+            player.coins += card.value;
+            
+            // Ajouter la carte à la collection
+            player.collection[card.id] = (player.collection[card.id] || 0) + 1;
+
+            revealedCardsCount++;
+            showToast(`+${card.value} 🪙 pour ${card.name} !`, "success");
+
+            // Si toutes les cartes sont révélées
+            if (revealedCardsCount === 5) {
+                const closeBtn = document.getElementById('close-reveal-btn');
+                closeBtn.disabled = false;
+                closeBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                savePlayerData();
+            }
+        }
+
+        function closeRevealModal() {
+            document.getElementById('reveal-modal').classList.add('hidden');
+            updateUI();
+        }
+
+        /* --- 7. ACHAT ET BOUTIQUE (SHOP) --- */
+        function renderShop() {
+            const container = document.getElementById('shop-cards-container');
+            container.innerHTML = '';
+
+            // Sélectionner quelques cartes intéressantes à vendre
+            const featuredCards = CARDS_DATABASE.filter(c => c.shopPrice);
+
+            featuredCards.forEach(card => {
+                const cardDiv = document.createElement('div');
+                cardDiv.className = 'flex flex-col items-center';
+                
+                cardDiv.innerHTML = `
+                    <div class="w-full h-52 md:h-60 mb-2">
+                        ${createCardElement(card, true, true)}
+                    </div>
+                    <button onclick="buySingleCard(${card.id})" class="w-full bg-slate-800 hover:bg-amber-500 hover:text-slate-950 border border-amber-500/40 font-bold py-1.5 rounded-xl text-xs flex items-center justify-center gap-1 transition">
+                        Acheter : ${card.shopPrice} 🪙
+                    </button>
+                `;
+                container.appendChild(cardDiv);
+            });
+        }
+
+        function buyBooster(type, price) {
+            if (player.coins < price) {
+                showToast("Pas assez de pièces 🪙 !", "error");
+                return;
+            }
+            player.coins -= price;
+            player.boosters[type] = (player.boosters[type] || 0) + 1;
+            savePlayerData();
+            showToast(`Booster ${type.toUpperCase()} acheté !`, "success");
+        }
+
+        function buySingleCard(cardId) {
+            const card = CARDS_DATABASE.find(c => c.id === cardId);
+            if (!card) return;
+
+            if (player.coins < card.shopPrice) {
+                showToast("Pas assez de pièces 🪙 !", "error");
+                return;
+            }
+
+            player.coins -= card.shopPrice;
+            player.collection[card.id] = (player.collection[card.id] || 0) + 1;
+            savePlayerData();
+            showToast(`${card.name} ajouté à votre collection !`, "success");
+        }
+
+        /* --- 8. ALBUM / COLLECTION (BINDER) --- */
+        let currentFilter = 'all';
+
+        function filterBinder(rarity) {
+            currentFilter = rarity;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('bg-amber-500', 'text-slate-950');
+                btn.classList.add('bg-slate-800', 'text-slate-300');
+            });
+            event.target.classList.add('bg-amber-500', 'text-slate-950');
+            event.target.classList.remove('bg-slate-800', 'text-slate-300');
+            renderBinder(rarity);
+        }
+
+        function renderBinder(filter = 'all') {
+            const container = document.getElementById('binder-grid');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const filtered = CARDS_DATABASE.filter(card => {
+                if (filter === 'all') return true;
+                return card.rarity === filter;
+            });
+
+            filtered.forEach(card => {
+                const cardWrap = document.createElement('div');
+                cardWrap.className = 'h-56 md:h-64 w-full';
+                cardWrap.innerHTML = createCardElement(card, true, true);
+                container.appendChild(cardWrap);
+            });
+        }
+
+        /* --- 9. NOTIFICATION TOAST --- */
+        function showToast(message, type = "info") {
+            const toast = document.getElementById('toast');
+            const msgEl = document.getElementById('toast-msg');
+            const iconEl = document.getElementById('toast-icon');
+
+            msgEl.innerText = message;
+            if (type === "error") {
+                iconEl.className = "fa-solid fa-circle-exclamation text-red-400 text-xl";
+            } else {
+                iconEl.className = "fa-solid fa-circle-check text-amber-400 text-xl";
+            }
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        // Démarrage initial au chargement de la page
+        window.onload = () => {
+            loadPlayerData();
+        };
+    </script>
+</body>
+</html>
