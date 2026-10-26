@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokémon 30th Celebration - TCG Collector</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        gold: '#fbbf24',
+                        darkBg: '#0b0f19',
+                        cardBg: '#1e293b'
+                    },
+                    animation: {
+                        'pulse-glow': 'pulseGlow 2s infinite'
+                    },
+                    keyframes: {
+                        pulseGlow: {
+                            '0%, 100%': { boxShadow: '0 0 15px rgba(251, 191, 36, 0.4)' },
+                            '50%': { boxShadow: '0 0 30px rgba(251, 191, 36, 0.9)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at top, #1e1b4b 0%, #0b0f19 100%);
+            min-height: 100vh;
+            color: #f8fafc;
+        }
+        .holo-card {
+            position: relative;
+            overflow: hidden;
+        }
+        .holo-card::after {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(115deg, transparent 20%, rgba(255, 255, 255, 0.25) 40%, rgba(255, 215, 0, 0.3) 50%, rgba(255, 0, 128, 0.25) 60%, transparent 80%);
+            transform: rotate(25deg);
+            transition: all 0.5s ease;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        .border-30th { border: 3px solid #fbbf24; box-shadow: 0 0 15px rgba(251, 191, 36, 0.5); }
+        .border-legendary { border: 3px solid #ec4899; box-shadow: 0 0 20px rgba(236, 72, 153, 0.6); }
+        .booster-pack { cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .booster-pack:hover { transform: scale(1.05) translateY(-5px); box-shadow: 0 15px 30px rgba(251, 191, 36, 0.3); }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- BARRE DE NAVIGATION -->
+    <header class="bg-slate-900/80 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50 px-4 py-3">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-300 flex items-center justify-center font-black text-slate-900 text-xl shadow-lg shadow-amber-500/30">30</div>
+                <div>
+                    <h1 class="font-extrabold text-lg tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-500">POKÉMON TCG</h1>
+                    <p class="text-xs text-slate-400">30th Celebration Edition</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2 bg-slate-800/90 border border-amber-500/30 px-4 py-1.5 rounded-full shadow-inner">
+                    <i class="fa-solid fa-coins text-amber-400 text-lg animate-bounce"></i>
+                    <span id="coins-display" class="font-bold text-amber-300 text-base">0</span>
+                    <span class="text-xs text-slate-400 font-semibold">🪙</span>
+                </div>
+                <button onclick="resetData()" class="text-xs text-slate-500 hover:text-red-400 transition" title="Réinitialiser">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- NAVIGATION ONGLETS -->
+    <nav class="bg-slate-900/50 border-b border-slate-800/60 py-2">
+        <div class="max-w-md mx-auto flex justify-around px-2">
+            <button onclick="switchTab('boosters')" id="tab-boosters" class="tab-btn active px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition bg-amber-500/20 text-amber-400 border border-amber-500/40">
+                <i class="fa-solid fa-box-open"></i> Boosters
+            </button>
+            <button onclick="switchTab('shop')" id="tab-shop" class="tab-btn px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition text-slate-400 hover:bg-slate-800">
+                <i class="fa-solid fa-store"></i> Boutique
+            </button>
+            <button onclick="switchTab('binder')" id="tab-binder" class="tab-btn px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition text-slate-400 hover:bg-slate-800">
+                <i class="fa-solid fa-book-bookmark"></i> Album (<span id="binder-count">0</span>)
+            </button>
+        </div>
+    </nav>
+
+    <!-- CONTENU -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6">
+        <!-- SECTION BOOSTERS -->
+        <section id="section-boosters" class="tab-section block">
+            <div class="text-center my-6">
+                <h2 class="text-3xl font-black text-white tracking-wide">OUVRIR UN BOOSTER</h2>
+                <p class="text-slate-400 text-sm mt-1">Cliquez sur un booster pour découvrir vos cartes !</p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto my-8">
+                <div class="bg-slate-800/60 border border-slate-700/80 rounded-2xl p-5 flex flex-col items-center text-center">
+                    <div class="w-40 h-60 rounded-xl bg-gradient-to-br from-blue-600 via-indigo-700 to-purple-800 p-3 shadow-xl booster-pack flex flex-col justify-between items-center relative border-2 border-indigo-400/30" onclick="openBooster('standard')">
+                        <div class="text-xs font-black bg-indigo-900/80 px-2 py-0.5 rounded text-indigo-200">STANDARD</div>
+                        <div class="text-center my-auto">
+                            <i class="fa-solid fa-bolt text-5xl text-yellow-300 drop-shadow-md mb-2"></i>
+                            <div class="font-black text-lg text-white leading-tight">30th Edition</div>
+                            <div class="text-[10px] text-indigo-200 uppercase tracking-widest mt-1">5 Cartes</div>
+                        </div>
+                        <div class="text-[11px] font-bold text-amber-300 bg-slate-900/60 px-3 py-1 rounded-full">OUVRIR</div>
+                    </div>
+                    <div class="mt-4 flex justify-between items-center w-full px-2">
+                        <span class="text-sm font-semibold text-slate-300">En réserve :</span>
+                        <span id="count-booster-standard" class="text-lg font-black text-amber-400">0</span>
+                    </div>
+                    <button onclick="openBooster('standard')" class="w-full mt-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded-xl text-sm transition shadow-lg shadow-indigo-600/30 disabled:opacity-50" id="btn-open-standard">Ouvrir Booster</button>
+                </div>
+
+                <div class="bg-slate-800/60 border border-amber-500/40 rounded-2xl p-5 flex flex-col items-center text-center">
+                    <div class="w-40 h-60 rounded-xl bg-gradient-to-br from-amber-500 via-yellow-600 to-red-600 p-3 shadow-xl booster-pack flex flex-col justify-between items-center relative border-2 border-amber-300/60 animate-pulse-glow" onclick="openBooster('deluxe')">
+                        <div class="text-xs font-black bg-slate-900/90 px-2 py-0.5 rounded text-amber-300 border border-amber-400/50">DELUXE 30TH</div>
+                        <div class="text-center my-auto">
+                            <i class="fa-solid fa-crown text-5xl text-amber-200 drop-shadow-md mb-2"></i>
+                            <div class="font-black text-lg text-white leading-tight">Celebration</div>
+                            <div class="text-[10px] text-amber-100 uppercase tracking-widest mt-1">5 Cartes Rares+</div>
+                        </div>
+                        <div class="text-[11px] font-bold text-slate-950 bg-amber-300 px-3 py-1 rounded-full">OUVRIR</div>
+                    </div>
+                    <div class="mt-4 flex justify-between items-center w-full px-2">
+                        <span class="text-sm font-semibold text-slate-300">En réserve :</span>
+                        <span id="count-booster-deluxe" class="text-lg font-black text-amber-400">0</span>
+                    </div>
+                    <button onclick="openBooster('deluxe')" class="w-full mt-3 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black py-2 rounded-xl text-sm transition shadow-lg shadow-amber-500/30 disabled:opacity-50" id="btn-open-deluxe">Ouvrir Deluxe</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION BOUTIQUE -->
+        <section id="section-shop" class="tab-section hidden">
+            <div class="text-center my-6">
+                <h2 class="text-3xl font-black text-white tracking-wide">BOUTIQUE 🪙</h2>
+                <p class="text-slate-400 text-sm mt-1">Achetez des boosters ou des cartes à l'unité !</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                <div class="bg-slate-800/80 border border-slate-700 p-4 rounded-xl flex items-center justify-between">
+                    <div>
+                        <h4 class="font-bold text-white">Booster Standard 30th</h4>
+                        <p class="text-xs text-slate-400">5 cartes</p>
+                    </div>
+                    <button onclick="buyBooster('standard', 50)" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold px-4 py-2 rounded-xl text-sm">50 🪙</button>
+                </div>
+                <div class="bg-slate-800/80 border border-amber-500/40 p-4 rounded-xl flex items-center justify-between">
+                    <div>
+                        <h4 class="font-bold text-amber-300">Booster Deluxe 30th</h4>
+                        <p class="text-xs text-slate-400">Rares & EX garanties</p>
+                    </div>
+                    <button onclick="buyBooster('deluxe', 200)" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold px-4 py-2 rounded-xl text-sm">200 🪙</button>
+                </div>
+            </div>
+            <h3 class="text-xl font-bold text-amber-400 mb-4"><i class="fa-solid fa-star"></i> Cartes en Vedette</h3>
+            <div id="shop-cards-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
+        </section>
+
+        <!-- SECTION ALBUM -->
+        <section id="section-binder" class="tab-section hidden">
+            <div class="text-center my-6">
+                <h2 class="text-3xl font-black text-white tracking-wide">MA COLLECTION</h2>
+                <p class="text-slate-400 text-sm mt-1">Vos cartes Pokémon du set 30th Celebration.</p>
+            </div>
+            <div class="flex flex-wrap justify-center gap-2 mb-6">
+                <button onclick="filterBinder('all')" class="filter-btn active px-3 py-1 rounded-lg text-xs font-bold bg-amber-500 text-slate-950">Toutes</button>
+                <button onclick="filterBinder('Légendaire')" class="filter-btn px-3 py-1 rounded-lg text-xs font-bold bg-slate-800 text-slate-300">Légendaires</button>
+                <button onclick="filterBinder('Ultra Rare')" class="filter-btn px-3 py-1 rounded-lg text-xs font-bold bg-slate-800 text-slate-300">Ultra Rares</button>
+                <button onclick="filterBinder('Rare')" class="filter-btn px-3 py-1 rounded-lg text-xs font-bold bg-slate-800 text-slate-300">Rares</button>
+                <button onclick="filterBinder('Commune')" class="filter-btn px-3 py-1 rounded-lg text-xs font-bold bg-slate-800 text-slate-300">Communes</button>
+            </div>
+            <div id="binder-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
+        </section>
+    </main>
+
+    <!-- MODAL REVÉLATION -->
+    <div id="reveal-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-lg z-50 hidden flex flex-col items-center justify-center p-4">
+        <h3 class="text-2xl font-black text-amber-400 mb-2">BOOSTER OUVERT !</h3>
+        <p class="text-slate-300 text-sm mb-6">Cliquez sur chaque carte pour la révéler</p>
+        <div id="reveal-cards-container" class="flex flex-wrap justify-center items-center gap-4 max-w-5xl my-4"></div>
+        <button id="close-reveal-btn" onclick="closeRevealModal()" class="mt-8 bg-amber-500 text-slate-950 font-black px-8 py-3 rounded-2xl opacity-50 cursor-not-allowed transition" disabled>Récupérer</button>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-800 border border-amber-500/50 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-amber-400 text-xl"></i>
+        <span id="toast-msg" class="text-sm font-semibold">Notification</span>
+    </div>
+
+    <!-- SCRIPT DU JEU AVEC LES VRAIES IMAGES DE CARTES -->
+    <script>
+        const CARDS_DATABASE = [
+            { id: 1, name: "Jirachi ex", hp: 160, rarity: "Ultra Rare", value: 100, shopPrice: 700, img: "https://images.pokemontcg.io/base1/4.png" },
+            { id: 2, name: "Salamence ex", hp: 330, rarity: "Ultra Rare", value: 100, shopPrice: 750, img: "https://images.pokemontcg.io/base1/2.png" },
+            { id: 3, name: "Mewtwo ex", hp: 230, rarity: "Légendaire", value: 250, shopPrice: 1200, img: "https://images.pokemontcg.io/base1/10.png" },
+            { id: 4, name: "Mew ex", hp: 160, rarity: "Ultra Rare", value: 100, shopPrice: 600, img: "https://images.pokemontcg.io/base1/15.png" },
+            { id: 5, name: "Charizard", hp: 120, rarity: "Légendaire", value: 250, shopPrice: 1500, img: "https://images.pokemontcg.io/base1/4.png" },
+            { id: 6, name: "Lapras", hp: 130, rarity: "Commune", value: 10, shopPrice: 60, img: "https://images.pokemontcg.io/base1/25.png" },
+            { id: 7, name: "Articuno", hp: 120, rarity: "Rare", value: 30, shopPrice: 180, img: "https://images.pokemontcg.io/base1/17.png" },
+            { id: 8, name: "Zapdos", hp: 120, rarity: "Rare", value: 30, shopPrice: 180, img: "https://images.pokemontcg.io/base1/16.png" },
+            { id: 9, name: "Toxtricity", hp: 140, rarity: "Rare", value: 30, shopPrice: 150, img: "https://images.pokemontcg.io/base1/18.png" },
+            { id: 10, name: "Morpeko", hp: 70, rarity: "Commune", value: 10, shopPrice: 40, img: "https://images.pokemontcg.io/base1/30.png" },
+            { id: 11, name: "Drifloon", hp: 70, rarity: "Commune", value: 10, shopPrice: 40, img: "https://images.pokemontcg.io/base1/32.png" },
+            { id: 12, name: "Chandelure", hp: 140, rarity: "Rare", value: 30, shopPrice: 150, img: "https://images.pokemontcg.io/base1/20.png" },
+            { id: 13, name: "Lycanroc", hp: 130, rarity: "Rare", value: 30, shopPrice: 150, img: "https://images.pokemontcg.io/base1/21.png" },
+            { id: 14, name: "Gengar ex", hp: 280, rarity: "Légendaire", value: 250, shopPrice: 1300, img: "https://images.pokemontcg.io/base1/5.png" },
+            { id: 15, name: "Umbreon ex", hp: 270, rarity: "Légendaire", value: 250, shopPrice: 1400, img: "https://images.pokemontcg.io/base1/12.png" },
+            { id: 16, name: "Zorua", hp: 70, rarity: "Commune", value: 10, shopPrice: 40, img: "https://images.pokemontcg.io/base1/35.png" },
+            { id: 17, name: "Zoroark", hp: 120, rarity: "Rare", value: 30, shopPrice: 190, img: "https://images.pokemontcg.io/base1/22.png" },
+            { id: 18, name: "Groudon", hp: 140, rarity: "Légendaire", value: 250, shopPrice: 1250, img: "https://images.pokemontcg.io/base1/6.png" },
+            { id: 19, name: "Pikachu", hp: 60, rarity: "Commune", value: 10, shopPrice: 80, img: "https://images.pokemontcg.io/base1/58.png" },
+            { id: 20, name: "Misty (Dresseur)", hp: 0, rarity: "Ultra Rare", value: 100, shopPrice: 600, img: "https://images.pokemontcg.io/base1/95.png" }
+        ];
+
+        let player = { coins: 150, boosters: { standard: 2, deluxe: 0 }, collection: {} };
+
+        function loadPlayerData() {
+            const saved = localStorage.getItem('pokemon_tcg_30th_save');
+            if (saved) { try { player = JSON.parse(saved); } catch(e) {} }
+            updateUI();
+        }
+
+        function savePlayerData() {
+            localStorage.setItem('pokemon_tcg_30th_save', JSON.stringify(player));
+            updateUI();
+        }
+
+        function resetData() {
+            if (confirm("Réinitialiser la sauvegarde ?")) {
+                localStorage.removeItem('pokemon_tcg_30th_save');
+                player = { coins: 150, boosters: { standard: 2, deluxe: 0 }, collection: {} };
+                savePlayerData();
+                showToast("Sauvegarde réinitialisée !", "success");
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('coins-display').innerText = player.coins;
+            document.getElementById('count-booster-standard').innerText = player.boosters.standard || 0;
+            document.getElementById('count-booster-deluxe').innerText = player.boosters.deluxe || 0;
+            document.getElementById('btn-open-standard').disabled = (player.boosters.standard || 0) <= 0;
+            document.getElementById('btn-open-deluxe').disabled = (player.boosters.deluxe || 0) <= 0;
+            document.getElementById('binder-count').innerText = `${Object.keys(player.collection).length}/${CARDS_DATABASE.length}`;
+            renderShop();
+            renderBinder('all');
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-section').forEach(sec => sec.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active', 'bg-amber-500/20', 'text-amber-400', 'border', 'border-amber-500/40');
+                btn.classList.add('text-slate-400');
+            });
+            document.getElementById(`section-${tabName}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`tab-${tabName}`);
+            activeBtn.classList.add('active', 'bg-amber-500/20', 'text-amber-400', 'border', 'border-amber-500/40');
+            activeBtn.classList.remove('text-slate-400');
+        }
+
+        function createCardElement(card, showCount = false) {
+            const ownedQty = player.collection[card.id] || 0;
+            const isOwned = ownedQty > 0;
+            let borderClass = card.rarity === "Légendaire" ? "border-legendary holo-card" : card.rarity === "Ultra Rare" ? "border-30th holo-card" : "border-slate-700";
+
+            return `
+                <div class="w-full h-full relative rounded-2xl bg-slate-900 border-2 ${borderClass} p-1 flex flex-col justify-between shadow-xl overflow-hidden ${!isOwned && showCount ? 'opacity-40 grayscale' : ''}">
+                    <div class="w-full h-full rounded-xl overflow-hidden flex items-center justify-center bg-slate-950 relative">
+                        <img src="${card.img}" alt="${card.name}" class="object-contain w-full h-full">
+                    </div>
+                    ${showCount && ownedQty > 0 ? `<div class="absolute top-2 right-2 bg-amber-400 text-slate-950 text-[11px] font-black px-2 py-0.5 rounded-full shadow-lg z-20">x${ownedQty}</div>` : ''}
+                </div>
+            `;
+        }
+
+        let revealedCardsCount = 0;
+
+        function openBooster(type) {
+            if ((player.boosters[type] || 0) <= 0) return;
+            player.boosters[type]--;
+            savePlayerData();
+
+            let currentDrawnCards = [];
+            revealedCardsCount = 0;
+
+            for (let i = 0; i < 5; i++) {
+                let selectedCard;
+                if (type === 'deluxe') {
+                    const rarePool = CARDS_DATABASE.filter(c => c.rarity !== 'Commune');
+                    selectedCard = rarePool[Math.floor(Math.random() * rarePool.length)];
+                } else {
+                    const rand = Math.random();
+                    let pool = rand < 0.1 ? CARDS_DATABASE.filter(c => c.rarity === 'Légendaire') : rand < 0.3 ? CARDS_DATABASE.filter(c => c.rarity === 'Ultra Rare') : CARDS_DATABASE.filter(c => c.rarity === 'Commune' || c.rarity === 'Rare');
+                    selectedCard = pool[Math.floor(Math.random() * pool.length)];
+                }
+                currentDrawnCards.push(selectedCard);
+            }
+
+            const container = document.getElementById('reveal-cards-container');
+            container.innerHTML = '';
+            document.getElementById('close-reveal-btn').disabled = true;
+            document.getElementById('close-reveal-btn').classList.add('opacity-50', 'cursor-not-allowed');
+
+            currentDrawnCards.forEach((card, index) => {
+                const cardWrapper = document.createElement('div');
+                cardWrapper.className = 'w-36 h-52 md:w-44 md:h-64 cursor-pointer';
+                cardWrapper.innerHTML = `
+                    <div id="drawn-card-${index}" class="w-full h-full rounded-2xl bg-gradient-to-br from-indigo-900 to-slate-900 border-2 border-amber-400/50 p-4 flex flex-col items-center justify-center text-center shadow-2xl">
+                        <div class="w-12 h-12 rounded-full border-2 border-amber-400 flex items-center justify-center bg-slate-950 mb-2">
+                            <span class="font-black text-amber-400 text-sm">30</span>
+                        </div>
+                        <span class="text-xs font-bold text-amber-300">Toucher</span>
+                    </div>
+                `;
+                cardWrapper.onclick = () => revealSingleCard(index, card, cardWrapper);
+                container.appendChild(cardWrapper);
+            });
+
+            document.getElementById('reveal-modal').classList.remove('hidden');
+        }
+
+        function revealSingleCard(index, card, wrapperElement) {
+            const cardElement = document.getElementById(`drawn-card-${index}`);
+            if (cardElement.dataset.revealed === "true") return;
+            cardElement.dataset.revealed = "true";
+            
+            wrapperElement.innerHTML = createCardElement(card, false);
+            player.coins += card.value;
+            player.collection[card.id] = (player.collection[card.id] || 0) + 1;
+            revealedCardsCount++;
+
+            if (revealedCardsCount === 5) {
+                const closeBtn = document.getElementById('close-reveal-btn');
+                closeBtn.disabled = false;
+                closeBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                savePlayerData();
+            }
+        }
+
+        function closeRevealModal() {
+            document.getElementById('reveal-modal').classList.add('hidden');
+            updateUI();
+        }
+
+        function renderShop() {
+            const container = document.getElementById('shop-cards-container');
+            container.innerHTML = '';
+            CARDS_DATABASE.filter(c => c.shopPrice).forEach(card => {
+                const cardDiv = document.createElement('div');
+                cardDiv.className = 'flex flex-col items-center';
+                cardDiv.innerHTML = `
+                    <div class="w-full h-52 md:h-60 mb-2">${createCardElement(card, true)}</div>
+                    <button onclick="buySingleCard(${card.id})" class="w-full bg-slate-800 hover:bg-amber-500 hover:text-slate-950 border border-amber-500/40 font-bold py-1.5 rounded-xl text-xs transition">Acheter : ${card.shopPrice} 🪙</button>
+                `;
+                container.appendChild(cardDiv);
+            });
+        }
+
+        function buyBooster(type, price) {
+            if (player.coins < price) { showToast("Pas assez de pièces !", "error"); return; }
+            player.coins -= price;
+            player.boosters[type] = (player.boosters[type] || 0) + 1;
+            savePlayerData();
+            showToast("Booster acheté !", "success");
+        }
+
+        function buySingleCard(cardId) {
+            const card = CARDS_DATABASE.find(c => c.id === cardId);
+            if (player.coins < card.shopPrice) { showToast("Pas assez de pièces !", "error"); return; }
+            player.coins -= card.shopPrice;
+            player.collection[card.id] = (player.collection[card.id] || 0) + 1;
+            savePlayerData();
+            showToast("Carte achetée !", "success");
+        }
+
+        function filterBinder(rarity) {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('bg-amber-500', 'text-slate-950');
+                btn.classList.add('bg-slate-800', 'text-slate-300');
+            });
+            event.target.classList.add('bg-amber-500', 'text-slate-950');
+            event.target.classList.remove('bg-slate-800', 'text-slate-300');
+            renderBinder(rarity);
+        }
+
+        function renderBinder(filter = 'all') {
+            const container = document.getElementById('binder-grid');
+            if (!container) return;
+            container.innerHTML = '';
+            CARDS_DATABASE.filter(card => filter === 'all' || card.rarity === filter).forEach(card => {
+                const cardWrap = document.createElement('div');
+                cardWrap.className = 'h-56 md:h-64 w-full';
+                cardWrap.innerHTML = createCardElement(card, true);
+                container.appendChild(cardWrap);
+            });
+        }
+
+        function showToast(message, type = "info") {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = message;
+            document.getElementById('toast-icon').className = type === "error" ? "fa-solid fa-circle-exclamation text-red-400 text-xl" : "fa-solid fa-circle-check text-amber-400 text-xl";
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3000);
+        }
+
+        window.onload = () => loadPlayerData();
+    </script>
+</body>
+</html>
