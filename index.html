@@ -1,0 +1,373 @@
+// Base de données des cartes Pokémon (30th Celebration)
+
+const cardsDatabase = [
+    // --- CARTES SÉRIE 30TH CELEBRATION EX & HOLO ---
+    {
+        id: 1,
+        name: "Jirachi ex",
+        hp: 160,
+        rarity: "Ultra Rare",
+        type: "Acier",
+        image: "images/jirachi.png"
+    },
+    {
+        id: 2,
+        name: "Salamence ex",
+        hp: 330,
+        rarity: "Ultra Rare",
+        type: "Dragon",
+        image: "images/salamence.png"
+    },
+    {
+        id: 3,
+        name: "Mewtwo ex",
+        hp: 230,
+        rarity: "Légendaire",
+        type: "Psy",
+        image: "images/mewtwo.png"
+    },
+    {
+        id: 4,
+        name: "Mew ex",
+        hp: 160,
+        rarity: "Ultra Rare",
+        type: "Psy",
+        image: "images/mew.png"
+    },
+    {
+        id: 5,
+        name: "Mew (Rouge & Bleu)",
+        hp: 60,
+        rarity: "Secret Rare",
+        type: "Psy",
+        image: "images/mew-red-blue.png"
+    },
+    {
+        id: 6,
+        name: "Mew (Vert)",
+        hp: 60,
+        rarity: "Secret Rare",
+        type: "Psy",
+        image: "images/mew-green.png"
+    },
+    {
+        id: 7,
+        name: "Charizard (Dracaufeu)",
+        hp: 120,
+        rarity: "Légendaire",
+        type: "Feu",
+        image: "images/charizard.png"
+    },
+    {
+        id: 8,
+        name: "Delcatty",
+        hp: 70,
+        rarity: "Rare",
+        type: "Incolore",
+        image: "images/delcatty.png"
+    },
+    {
+        id: 9,
+        name: "Metagross (Métalosse)",
+        hp: 100,
+        rarity: "Rare",
+        type: "Acier",
+        image: "images/metagross.png"
+    },
+    {
+        id: 10,
+        name: "Genesect EX",
+        hp: 170,
+        rarity: "Ultra Rare",
+        type: "Plante",
+        image: "images/genesect.png"
+    },
+    {
+        id: 11,
+        name: "Misty (Dresseur)",
+        hp: 0,
+        rarity: "Rare",
+        type: "Dresseur",
+        image: "images/misty.png"
+    },
+
+    // --- AUTRES CARTES SPECIALES ---
+    {
+        id: 12,
+        name: "Chandelure",
+        hp: 140,
+        rarity: "Rare",
+        type: "Psy",
+        image: "images/chandelure.png"
+    },
+    {
+        id: 13,
+        name: "Lycanroc",
+        hp: 130,
+        rarity: "Rare",
+        type: "Combat",
+        image: "images/lycanroc.png"
+    },
+    {
+        id: 14,
+        name: "Alolan Meowth",
+        hp: 60,
+        rarity: "Commune",
+        type: "Obscurité",
+        image: "images/alolan-meowth.png"
+    },
+    {
+        id: 15,
+        name: "Scraggy",
+        hp: 80,
+        rarity: "Commune",
+        type: "Obscurité",
+        image: "images/scraggy.png"
+    },
+    {
+        id: 16,
+        name: "Galarian Meowth",
+        hp: 70,
+        rarity: "Commune",
+        type: "Acier",
+        image: "images/galarian-meowth.png"
+    },
+    {
+        id: 17,
+        name: "Gholdengo",
+        hp: 130,
+        rarity: "Ultra Rare",
+        type: "Acier",
+        image: "images/gholdengo.png"
+    },
+    {
+        id: 18,
+        name: "Lapras",
+        hp: 130,
+        rarity: "Rare",
+        type: "Eau",
+        image: "images/lapras.png"
+    },
+    {
+        id: 19,
+        name: "Articuno (Artikodin)",
+        hp: 120,
+        rarity: "Rare",
+        type: "Eau",
+        image: "images/articuno.png"
+    },
+    {
+        id: 20,
+        name: "Zapdos (Électhor)",
+        hp: 120,
+        rarity: "Rare",
+        type: "Électrique",
+        image: "images/zapdos.png"
+    },
+    {
+        id: 21,
+        name: "Toxtricity",
+        hp: 140,
+        rarity: "Rare",
+        type: "Électrique",
+        image: "images/toxtricity.png"
+    },
+    {
+        id: 22,
+        name: "Morpeko",
+        hp: 70,
+        rarity: "Commune",
+        type: "Électrique",
+        image: "images/morpeko.png"
+    },
+    {
+        id: 23,
+        name: "Drifloon",
+        hp: 70,
+        rarity: "Commune",
+        type: "Psy",
+        image: "images/drifloon.png"
+    },
+    {
+        id: 24,
+        name: "Kyogre",
+        hp: 140,
+        rarity: "Rare",
+        type: "Eau",
+        image: "images/kyogre.png"
+    },
+    {
+        id: 25,
+        name: "Palkia",
+        hp: 130,
+        rarity: "Rare",
+        type: "Eau",
+        image: "images/palkia.png"
+    },
+    {
+        id: 26,
+        name: "Greninja ex",
+        hp: 300,
+        rarity: "Légendaire",
+        type: "Eau",
+        image: "images/greninja.png"
+    },
+    {
+        id: 27,
+        name: "Wishiwashi",
+        hp: 30,
+        rarity: "Commune",
+        type: "Eau",
+        image: "images/wishiwashi.png"
+    },
+    {
+        id: 28,
+        name: "Pikachu (Éclair)",
+        hp: 70,
+        rarity: "Rare",
+        type: "Électrique",
+        image: "images/pikachu-thunder.png"
+    },
+    {
+        id: 29,
+        name: "Pikachu (Volt)",
+        hp: 70,
+        rarity: "Rare",
+        type: "Électrique",
+        image: "images/pikachu-volt.png"
+    },
+    {
+        id: 30,
+        name: "Victini",
+        hp: 80,
+        rarity: "Rare",
+        type: "Feu",
+        image: "images/victini.png"
+    },
+    {
+        id: 31,
+        name: "Reshiram",
+        hp: 130,
+        rarity: "Rare",
+        type: "Feu",
+        image: "images/reshiram.png"
+    },
+    {
+        id: 32,
+        name: "Fuecoco ex (Chochodile)",
+        hp: 210,
+        rarity: "Ultra Rare",
+        type: "Feu",
+        image: "images/fuecoco.png"
+    },
+    {
+        id: 33,
+        name: "Slowpoke (Ramoloss)",
+        hp: 80,
+        rarity: "Commune",
+        type: "Eau",
+        image: "images/slowpoke.png"
+    },
+    {
+        id: 34,
+        name: "Exeggcute",
+        hp: 60,
+        rarity: "Commune",
+        type: "Plante",
+        image: "images/exeggcute.png"
+    },
+    {
+        id: 35,
+        name: "Alolan Exeggutor",
+        hp: 150,
+        rarity: "Rare",
+        type: "Plante",
+        image: "images/alolan-exeggutor.png"
+    },
+    {
+        id: 36,
+        name: "Volbeat",
+        hp: 80,
+        rarity: "Commune",
+        type: "Plante",
+        image: "images/volbeat.png"
+    },
+    {
+        id: 37,
+        name: "Illumise",
+        hp: 80,
+        rarity: "Commune",
+        type: "Plante",
+        image: "images/illumise.png"
+    },
+    {
+        id: 38,
+        name: "Tropius",
+        hp: 120,
+        rarity: "Commune",
+        type: "Plante",
+        image: "images/tropius.png"
+    },
+    {
+        id: 39,
+        name: "Cherubi",
+        hp: 40,
+        rarity: "Commune",
+        type: "Plante",
+        image: "images/cherubi.png"
+    },
+    {
+        id: 40,
+        name: "Cherrim",
+        hp: 80,
+        rarity: "Commune",
+        type: "Plante",
+        image: "images/cherrim.png"
+    },
+    {
+        id: 41,
+        name: "Vivillon",
+        hp: 120,
+        rarity: "Rare",
+        type: "Plante",
+        image: "images/vivillon.png"
+    },
+    {
+        id: 42,
+        name: "Vulpix (Goupix)",
+        hp: 70,
+        rarity: "Commune",
+        type: "Feu",
+        image: "images/vulpix.png"
+    },
+    {
+        id: 43,
+        name: "Ninetales (Feunard)",
+        hp: 110,
+        rarity: "Rare",
+        type: "Feu",
+        image: "images/ninetales.png"
+    },
+    {
+        id: 44,
+        name: "Moltres (Sulfura)",
+        hp: 120,
+        rarity: "Rare",
+        type: "Feu",
+        image: "images/moltres.png"
+    },
+    {
+        id: 45,
+        name: "Ho-Oh",
+        hp: 130,
+        rarity: "Rare",
+        type: "Feu",
+        image: "images/ho-oh.png"
+    }
+];
+
+// Information sur le Booster
+const boosterInfo = {
+    name: "30th Celebration Booster",
+    image: "images/booster.png"
+};
